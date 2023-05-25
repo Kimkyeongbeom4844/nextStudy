@@ -4,22 +4,33 @@ import styles from "./page.module.css";
 import TodoListElem from "@/components/list/TodoListElem";
 
 const Home = () => {
+  const [inputText, setInputText] = useState<string>("");
+  const [todoList, setTodoList] = useState<
+    { id: number; title: string }[] | null
+  >(null);
   useEffect(() => {
     (async () => {
       const res = await fetch("/api/todolist");
-      console.log(await res.json());
+      const data = await res.json();
+      console.log(data);
+      setTodoList(data);
     })();
   }, []);
-  const [inputText, setInputText] = useState("");
-  const onChangeInputText = (e: any) => {
+  const onChangeInputText = (e: {
+    currentTarget: { value: React.SetStateAction<string> };
+  }) => {
     setInputText(e.currentTarget.value);
   };
-  const onSubmitInputText = (e: any) => {
+  const onSubmitInputText = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    console.log(inputText);
-  };
-  const onClickDeleteTodoListButton = (e: any) => {
-    alert(111);
+    const res = await fetch("/api/todolist", {
+      method: "POST",
+      body: JSON.stringify({ message: inputText }),
+    });
+    const data = await res.json();
+    console.log(data);
+    setTodoList([...todoList, { id: data.id, title: inputText }]);
+    setInputText("");
   };
   return (
     <>
@@ -34,22 +45,13 @@ const Home = () => {
         <button>추가</button>
       </form>
       <ul className={styles.todolist_wrap}>
-        <TodoListElem
-          text="일어나기"
-          onClickDeleteTodoListButton={onClickDeleteTodoListButton}
-        />
-        <TodoListElem
-          text="일어나기"
-          onClickDeleteTodoListButton={onClickDeleteTodoListButton}
-        />
-        <TodoListElem
-          text="일어나기"
-          onClickDeleteTodoListButton={onClickDeleteTodoListButton}
-        />
-        <TodoListElem
-          text="일어나기"
-          onClickDeleteTodoListButton={onClickDeleteTodoListButton}
-        />
+        {todoList === null ? (
+          <div>로딩중</div>
+        ) : (
+          todoList.map((v: { id: number; title: string }) => (
+            <TodoListElem key={v.id} fk={v.id} text={v.title} />
+          ))
+        )}
       </ul>
     </>
   );
