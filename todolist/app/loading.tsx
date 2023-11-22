@@ -1,7 +1,7 @@
 import React from "react";
 
 const Loading = () => {
-  return <div>로딩중asdad</div>;
+  return <div>전역 로딩 UI</div>;
 };
 
 export default Loading;

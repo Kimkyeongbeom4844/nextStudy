@@ -1,3 +1,4 @@
+import Count from "@/components/count/Count";
 import React from "react";
 
 const Page = async () => {
@@ -21,7 +22,12 @@ const Page = async () => {
     }
   };
   const data = await fetchData();
-  return <div>{data.errorMessage}</div>;
+  return (
+    <div>
+      <p>{data.errorMessage}</p>
+      <Count />
+    </div>
+  );
 };
 
 export default Page;
