@@ -1,0 +1,14 @@
+:root {
+  font-size: 16px;
+}
+body {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1;
+}
+button {
+  cursor: pointer;
+}
