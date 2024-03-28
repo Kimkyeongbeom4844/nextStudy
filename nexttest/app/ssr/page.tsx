@@ -1,10 +1,12 @@
+import Link from "next/link";
 import React from "react";
 
 const Page = async () => {
   const data = (await (await getUsers()).json()) as Array<any>;
+  console.log("ssr");
   return (
     <>
-      <h2>SSG</h2>
+      <h2>SSR</h2>
       <ul>
         {Array.isArray(data)
           ? data.map((v, i) => {
@@ -12,6 +14,8 @@ const Page = async () => {
             })
           : null}
       </ul>
+      <Link href={"/csr"}>csr로 가기</Link>
+      <Link href={"/ssg"}>ssg로 가기</Link>
     </>
   );
 };

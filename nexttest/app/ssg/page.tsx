@@ -1,7 +1,9 @@
+import Link from "next/link";
 import React from "react";
 
 const Page = async () => {
   const data = (await (await getUsers()).json()) as Array<any>;
+  console.log("ssg");
   return (
     <>
       <h2>SSG</h2>
@@ -12,6 +14,8 @@ const Page = async () => {
             })
           : null}
       </ul>
+      <Link href={"/csr"}>csr로 가기</Link>
+      <Link href={"/ssr"}>ssr로 가기</Link>
     </>
   );
 };
