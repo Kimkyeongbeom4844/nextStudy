@@ -18,6 +18,11 @@ import {
   AlertDialogOverlay,
   AlertDialogPortal,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function Page() {
   const [count, setCount] = useState(0);
@@ -28,7 +33,9 @@ export default function Page() {
         <Button variant={"myButton"} onClick={() => setShowModal(true)}>
           모달보기
         </Button>
-        <p> {showModal === true ? "모달열림" : "모달닫힘"}</p>
+        <p className="text-white">
+          {showModal === true ? "모달열림" : "모달닫힘"}
+        </p>
         <Button
           variant={"destructive"}
           onClick={(e) => {
@@ -38,9 +45,18 @@ export default function Page() {
           카운트 : {count}
         </Button>
       </header>
+      <Popover>
+        <PopoverTrigger>Open</PopoverTrigger>
+        <PopoverContent>Place content for the popover here.</PopoverContent>
+      </Popover>
+
       <AlertDialog open={showModal} onOpenChange={setShowModal}>
         <AlertDialogOverlay className="bg-[#555]/10" />
-        <AlertDialogContent className="p-0 gap-y-0 flex flex-col">
+        <AlertDialogContent
+          className="p-0 gap-y-0 flex flex-col"
+          onOpenAutoFocus={() => console.log("열림")}
+          onCloseAutoFocus={() => console.log("닫힘")}
+        >
           <h1>ㅎㅇㅎㅇㅎ</h1>
           <Button
             variant={"myButton"}
