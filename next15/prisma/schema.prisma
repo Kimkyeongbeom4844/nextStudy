@@ -7,30 +7,340 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model post {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  title     String   @db.VarChar(255)
-  content   String?
-  published Boolean  @default(false)
-  authorId  Int
-  user      user     @relation(fields: [authorId], references: [id], map: "Post_authorId_fkey")
+model tbFamilySite {
+  site_id     Int
+  lang_cd     String                    @db.Char(3)
+  sitename    String?                   @db.VarChar(45)
+  link        String?                   @db.VarChar(512)
+  link_target tbFamilySite_link_target? @default(blank)
+  is_active   tbFamilySite_is_active?   @default(Y)
+  del_yn      tbFamilySite_del_yn?      @default(N)
+  created_    DateTime                  @default(now()) @db.DateTime(0)
+  updated_    DateTime?                 @db.DateTime(0)
+  timestamp   DateTime?                 @default(now()) @db.Timestamp(0)
+  tcLang      tcLang                    @relation(fields: [lang_cd], references: [lang_cd], onDelete: NoAction, onUpdate: NoAction, map: "FK_tcLang4")
 
-  @@index([authorId], map: "Post_authorId_fkey")
+  @@id([site_id, lang_cd])
+  @@index([lang_cd], map: "FK_tcLang3_idx")
 }
 
-model profile {
-  id     Int     @id @default(autoincrement())
-  bio    String?
-  userId Int     @unique(map: "Profile_userId_key")
-  user   user    @relation(fields: [userId], references: [id], map: "Profile_userId_fkey")
+model tbFiles {
+  file_id        BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  file_type_cd   String?          @db.Char(3)
+  file_ori_name  String?          @db.VarChar(512)
+  file_upd_name  String?          @db.VarChar(512)
+  file_upd_path  String?          @db.VarChar(512)
+  file_upd_size  Int              @default(0)
+  file_ext       String?          @db.VarChar(45)
+  file_rmk       String?          @db.VarChar(1024)
+  del_yn         tbFiles_del_yn   @default(N)
+  created_       DateTime         @default(now()) @db.DateTime(0)
+  updated_       DateTime?        @db.DateTime(0)
+  timestamp      DateTime         @default(now()) @db.Timestamp(0)
+  tcFileType     tcFileType?      @relation(fields: [file_type_cd], references: [file_type_cd], onDelete: NoAction, onUpdate: NoAction, map: "FK_tcFiletype")
+  tbHistory      tbHistory[]
+  tbIntPrp       tbIntPrp[]
+  tbNoticeAttach tbNoticeAttach[]
+
+  @@index([file_type_cd], map: "FK_tcFiletype_idx")
 }
 
-model user {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique(map: "User_email_key")
-  name    String?
-  post    post[]
-  profile profile?
+model tbHistory {
+  history_id  Int
+  lang_cd     String                 @db.Char(3)
+  file_id     BigInt?                @db.UnsignedBigInt
+  seq         Int?
+  history_ymd DateTime?              @db.DateTime(0)
+  content     String?                @db.VarChar(512)
+  link        String?                @db.VarChar(512)
+  link_target tbHistory_link_target? @default(blank)
+  is_active   tbHistory_is_active?   @default(Y)
+  del_yn      tbHistory_del_yn?      @default(N)
+  created_    DateTime               @default(now()) @db.DateTime(0)
+  updated_    DateTime?              @db.DateTime(0)
+  timestamp   DateTime?              @default(now()) @db.Timestamp(0)
+  tbFiles     tbFiles?               @relation(fields: [file_id], references: [file_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_tbFiles")
+  tcLang      tcLang                 @relation(fields: [lang_cd], references: [lang_cd], onDelete: NoAction, onUpdate: NoAction, map: "FK_tcLang")
+
+  @@id([history_id, lang_cd])
+  @@index([file_id], map: "FK_tbFiles_idx")
+  @@index([lang_cd], map: "FK_tcLang_idx")
+}
+
+model tbInquiry {
+  inquiry_id      Int
+  lang_cd         String            @db.Char(3)
+  inquiry_type_id Int?
+  name            String?           @db.VarChar(45)
+  company_name    String?           @db.VarChar(45)
+  tel             String?           @db.VarChar(45)
+  email           String?           @db.VarChar(45)
+  content         String?           @db.VarChar(45)
+  status          tbInquiry_status? @default(W)
+  created_        DateTime?         @default(now()) @db.DateTime(0)
+  updated_        DateTime?         @db.DateTime(0)
+  del_yn          tbInquiry_del_yn? @default(N)
+  timestamp       DateTime?         @default(now()) @db.Timestamp(0)
+  tcInquiryType   tcInquiryType?    @relation(fields: [inquiry_type_id, lang_cd], references: [inquiry_type_id, lang_cd], onDelete: NoAction, onUpdate: NoAction, map: "FK_tcInquiryType0")
+  tcLang          tcLang            @relation(fields: [lang_cd], references: [lang_cd], onDelete: NoAction, onUpdate: NoAction, map: "FK_tcLang5")
+
+  @@id([inquiry_id, lang_cd])
+  @@index([inquiry_type_id, lang_cd], map: "FK_tcInquiryType0_idx")
+  @@index([lang_cd], map: "FK_tcLang5_idx")
+}
+
+model tbInquiryAnswer {
+  inquiry_id Int
+  lang_cd    String                  @db.Char(3)
+  content    String?                 @db.Text
+  created_   DateTime?               @default(now()) @db.DateTime(0)
+  updated_   DateTime?               @db.DateTime(0)
+  del_yn     tbInquiryAnswer_del_yn? @default(N)
+  timestamp  DateTime?               @default(now()) @db.Timestamp(0)
+
+  @@id([inquiry_id, lang_cd])
+}
+
+model tbIntPrp {
+  intprp_id          Int
+  lang_cd            String                       @db.Char(3)
+  file_id            BigInt                       @db.UnsignedBigInt
+  launch_ymd         DateTime?                    @db.DateTime(0)
+  title              String?                      @db.VarChar(100)
+  launch_status      tbIntPrp_launch_status
+  synopsys           String?                      @db.Text
+  origin_link        String?                      @db.VarChar(512)
+  origin_link_target tbIntPrp_origin_link_target?
+  author_name        String?                      @db.VarChar(45)
+  keyword            String?                      @db.VarChar(1024)
+  is_active          tbIntPrp_is_active?          @default(Y)
+  del_yn             tbIntPrp_del_yn?             @default(N)
+  created_           DateTime                     @default(now()) @db.DateTime(0)
+  updated_           DateTime?                    @db.DateTime(0)
+  timestamp          DateTime?                    @default(now()) @db.Timestamp(0)
+  tbFiles            tbFiles                      @relation(fields: [file_id], references: [file_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_tbFiles0")
+  tcLang             tcLang                       @relation(fields: [lang_cd], references: [lang_cd], onDelete: NoAction, onUpdate: NoAction, map: "FK_tcLang0")
+
+  @@id([intprp_id, lang_cd])
+  @@index([file_id], map: "FK_tbFiles_idx")
+  @@index([lang_cd], map: "FK_tcLang_idx")
+}
+
+model tbIntPrpLinks {
+  intprp_id       Int
+  lang_cd         String                         @db.Char(3)
+  seq             Int
+  platform_name   String?                        @db.VarChar(45)
+  platform_link   String?                        @db.VarChar(1024)
+  platform_target tbIntPrpLinks_platform_target?
+  created_        DateTime?                      @default(now()) @db.DateTime(0)
+  updated_        DateTime?                      @db.DateTime(0)
+  timestamp       DateTime?                      @default(now()) @db.Timestamp(0)
+
+  @@id([intprp_id, lang_cd, seq])
+}
+
+model tbMemberAdmin {
+  admin_id         Int                      @id @default(autoincrement())
+  userid           String?                  @db.VarChar(256)
+  password         String?                  @db.VarChar(512)
+  name             String?                  @db.VarChar(64)
+  is_active        tbMemberAdmin_is_active? @default(Y)
+  del_yn           tbMemberAdmin_del_yn?    @default(N)
+  created_         String?                  @db.VarChar(45)
+  tbMemberAdminLog tbMemberAdminLog[]
+}
+
+model tbMemberAdminLog {
+  log_id        BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  admin_id      Int?
+  login_ip      String?        @db.VarChar(45)
+  login_ua      String?        @db.VarChar(45)
+  created_      String?        @db.VarChar(45)
+  tbMemberAdmin tbMemberAdmin? @relation(fields: [admin_id], references: [admin_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_tbMemberAdmin")
+
+  @@index([admin_id], map: "FK_tbMemberAdmin_idx")
+}
+
+model tbNotice {
+  notice_id      Int
+  lang_cd        String              @db.Char(3)
+  notice_ymd     DateTime?           @db.DateTime(0)
+  top_fixed      tbNotice_top_fixed?
+  title          String?             @db.VarChar(256)
+  content        String?             @db.Text
+  del_yn         tbNotice_del_yn?    @default(N)
+  created_       DateTime            @default(now()) @db.DateTime(0)
+  updated_       DateTime?           @db.DateTime(0)
+  timestamp      DateTime?           @default(now()) @db.Timestamp(0)
+  tcLang         tcLang              @relation(fields: [lang_cd], references: [lang_cd], onDelete: NoAction, onUpdate: NoAction, map: "FK_tcLang2")
+  tbNoticeAttach tbNoticeAttach[]
+
+  @@id([notice_id, lang_cd])
+  @@index([lang_cd], map: "FK_tcLang_idx")
+}
+
+model tbNoticeAttach {
+  notice_id Int      @default(autoincrement())
+  lang_cd   String   @db.Char(3)
+  seq       Int
+  file_id   BigInt   @db.UnsignedBigInt
+  tbFiles   tbFiles  @relation(fields: [file_id], references: [file_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_tbFiles2")
+  tbNotice  tbNotice @relation(fields: [notice_id, lang_cd], references: [notice_id, lang_cd], onDelete: NoAction, onUpdate: NoAction, map: "FK_tbNotice2")
+
+  @@id([notice_id, lang_cd, seq, file_id])
+  @@index([file_id], map: "FK_tbFiles2_idx")
+}
+
+model tcFileType {
+  file_type_cd   String            @id @db.Char(3)
+  file_type_name String?           @db.VarChar(45)
+  del_yn         tcFileType_del_yn @default(N)
+  tbFiles        tbFiles[]
+}
+
+model tcInquiryType {
+  inquiry_type_id   Int
+  lang_cd           String                   @db.Char(3)
+  inquiry_type_name String?                  @db.VarChar(32)
+  is_active         tcInquiryType_is_active? @default(Y)
+  del_yn            tcInquiryType_del_yn?    @default(N)
+  tbInquiry         tbInquiry[]
+  tcLang            tcLang                   @relation(fields: [lang_cd], references: [lang_cd], onDelete: NoAction, onUpdate: NoAction, map: "FK_tcLang3")
+
+  @@id([inquiry_type_id, lang_cd])
+  @@index([lang_cd], map: "FK_tcLang3_idx")
+}
+
+model tcLang {
+  lang_cd       String            @id @db.Char(3)
+  lang_name     String?           @db.VarChar(45)
+  is_active     tcLang_is_active? @default(Y)
+  del_yn        tcLang_del_yn?    @default(N)
+  tbFamilySite  tbFamilySite[]
+  tbHistory     tbHistory[]
+  tbInquiry     tbInquiry[]
+  tbIntPrp      tbIntPrp[]
+  tbNotice      tbNotice[]
+  tcInquiryType tcInquiryType[]
+}
+
+enum tcFileType_del_yn {
+  Y
+  N
+}
+
+enum tcLang_is_active {
+  Y
+  N
+}
+
+enum tbNotice_top_fixed {
+  Y
+  N
+}
+
+enum tcInquiryType_is_active {
+  Y
+  N
+}
+
+enum tcLang_del_yn {
+  Y
+  N
+}
+
+enum tbFamilySite_link_target {
+  blank
+  self
+}
+
+enum tbMemberAdmin_is_active {
+  Y
+  N
+}
+
+enum tcInquiryType_del_yn {
+  Y
+  N
+}
+
+enum tbFamilySite_is_active {
+  Y
+  N
+}
+
+enum tbInquiryAnswer_del_yn {
+  Y
+  N
+}
+
+enum tbIntPrp_launch_status {
+  L
+  S
+}
+
+enum tbIntPrpLinks_platform_target {
+  blank
+  self
+}
+
+enum tbMemberAdmin_del_yn {
+  Y
+  N
+}
+
+enum tbFamilySite_del_yn {
+  Y
+  N
+}
+
+enum tbNotice_del_yn {
+  Y
+  N
+}
+
+enum tbHistory_link_target {
+  blank
+  self
+}
+
+enum tbFiles_del_yn {
+  Y
+  N
+}
+
+enum tbHistory_is_active {
+  Y
+  N
+}
+
+enum tbInquiry_status {
+  W
+  A
+}
+
+enum tbIntPrp_origin_link_target {
+  blank
+  self
+}
+
+enum tbHistory_del_yn {
+  Y
+  N
+}
+
+enum tbInquiry_del_yn {
+  Y
+  N
+}
+
+enum tbIntPrp_is_active {
+  Y
+  N
+}
+
+enum tbIntPrp_del_yn {
+  Y
+  N
 }

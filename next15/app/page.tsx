@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 export default async function Page() {
   const prisma = new PrismaClient();
 
-  const data = await prisma.user.findMany();
+  const data = await prisma.tbFamilySite.findMany();
   console.log(data);
 
   return (
@@ -13,11 +13,10 @@ export default async function Page() {
       <h1>/ 페이지</h1>
       {data.map((v) => {
         return (
-          <>
-            <p>{v.id}</p>
-            <p>{v.email}</p>
-            <p>{v.name}</p>
-          </>
+          <React.Fragment key={v.site_id}>
+            <p>{v.site_id}</p>
+            <p>{v.sitename}</p>
+          </React.Fragment>
         );
       })}
       <Link href={"/user"}>/user 로</Link>
