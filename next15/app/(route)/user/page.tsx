@@ -1,11 +1,13 @@
-import Link from "next/link";
 import React from "react";
+import TestRCC from "./components/TestRCC";
+import Userlist from "./components/Userlist";
 
-export default function page() {
+export default function Page() {
   return (
     <>
-      <h2>/user 페이지</h2>
-      <Link href={"/"}>/ 로</Link>
+      <TestRCC>
+        <Userlist />
+      </TestRCC>
     </>
   );
 }

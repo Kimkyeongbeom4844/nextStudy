@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 export default function Page() {
   const router = useRouter();
-
+  console.log("클라이언트컴포넌트");
   const onClickGetCookieButton = () => {
     console.log(document.cookie);
   };

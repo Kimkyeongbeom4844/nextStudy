@@ -8,16 +8,20 @@ const Page = () => {
   const onSubmitForm = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const data = await (
-        await fetch("/api/login", {
-          method: "POST",
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        })
-      ).json();
-      console.log(data);
+      const data = await fetch("/api/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+      switch (data.status) {
+        case 500:
+          throw new Error((await data.json()).error);
+        default:
+          console.log(await data.json());
+          break;
+      }
     } catch (error) {
       console.error(error);
     }
@@ -25,12 +29,16 @@ const Page = () => {
 
   const logout = async () => {
     try {
-      const data = await (
-        await fetch("/api/login", {
-          method: "GET",
-        })
-      ).json();
-      console.log(data);
+      const data = await fetch("/api/login", {
+        method: "GET",
+      });
+      switch (data.status) {
+        case 500:
+          throw new Error((await data.json()).error);
+        default:
+          console.log(await data.json());
+          break;
+      }
     } catch (error) {
       console.error(error);
     }

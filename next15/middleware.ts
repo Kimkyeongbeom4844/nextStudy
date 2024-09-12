@@ -1,16 +1,17 @@
-import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 // This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  if (request.cookies.has("access_token") === false) {
-    response.cookies.set({
-      name: "access_token",
-      value: "123123",
-      path: "/",
-    });
-  }
+  console.log(request.cookies.getAll());
+  request.cookies.clear();
+  response.cookies.set({
+    name: "access_token",
+    value: (Math.random() * 100).toString(),
+    path: "/",
+    httpOnly: true,
+  });
   return response;
 }
 

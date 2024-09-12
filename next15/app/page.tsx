@@ -1,26 +1,40 @@
 import React from "react";
 import Link from "next/link";
 import { PrismaClient } from "@prisma/client";
-import InsertUser from "./components/InsertUser";
+import Userlist from "./components/Userlist";
+
+export interface Userdata {
+  id: number;
+  email: string;
+  name: string | null;
+}
+
+export interface Userdata {
+  profile: {
+    id: number;
+    bio: string | null;
+  } | null;
+}
 
 export default async function Page() {
   const prisma = new PrismaClient();
 
-  const data = await prisma.user.findMany();
+  const data: Userdata[] = await prisma.user.findMany({
+    include: {
+      profile: {
+        select: {
+          id: true,
+          bio: true,
+        },
+      },
+    },
+  });
   console.log(data);
 
   return (
     <>
       <h1>/ 페이지</h1>
-      <InsertUser data={data} />
-      {data.map((v) => {
-        return (
-          <React.Fragment key={v.id}>
-            <p>{v.email}</p>
-            <p>{v.name}</p>
-          </React.Fragment>
-        );
-      })}
+      <Userlist data={data} />
       <Link href={"/user"}>/user 로</Link>
       <Link href={"/cookie"}>/cookie 로</Link>
     </>

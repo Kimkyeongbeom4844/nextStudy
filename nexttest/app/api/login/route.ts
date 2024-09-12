@@ -1,22 +1,23 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
-export const GET = async (request: Request) => {
+export const GET = async (request: NextRequest) => {
   try {
     const cookieStore = cookies();
     if (cookieStore.get("access_token") === undefined) {
-      return NextResponse.json({ error: "이미 로그아웃됨" });
+      throw new Error("이미 로그아웃됨");
     }
     cookieStore.delete("access_token");
     return NextResponse.json({ message: "로그아웃" });
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ error: error.message });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 };
 
-export const POST = async (request: Request) => {
+export const POST = async (request: NextRequest) => {
   try {
     const body = await request.json();
     console.log(body.email, body.password);
@@ -30,16 +31,15 @@ export const POST = async (request: Request) => {
         httpOnly: true,
       });
       return NextResponse.json({ message: "로그인" });
-    } else {
-      const decoded = jwt.verify(
-        (cookieStore.get("access_token") as any).value,
-        body.password
-      );
-      console.log(decoded);
-      return NextResponse.json({ message: "이미 로그인 됨" });
     }
+    const decoded = jwt.verify(
+      (cookieStore.get("access_token") as RequestCookie).value,
+      body.password
+    );
+    console.log(decoded);
+    throw new Error("이미 로그인 됨");
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ error: error.message });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 };
